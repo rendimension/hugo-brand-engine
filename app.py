@@ -79,30 +79,29 @@ os.makedirs(POST_OUTPUT_DIR, exist_ok=True)
 CANVAS_PRESETS = {
     # =========================================================================
     # LINKEDIN OFFICIAL V2 - Primary Hugo format (4:5)
-    # Canvas: 1080x1350 | Image: 1020px (75.5%) | Top: 90px | Bottom: 240px
+    # Canvas: 1080x1350 | LARGE TEXT for mobile readability
     # =========================================================================
     "linkedin": {
         "width": 1080,
         "height": 1350,
-        "top_bar_height": 90,           # Official: 90px
-        "bottom_bar_height": 240,       # Official: 240px
-        "padding": 80,                  # Official: 80px lateral
-        "padding_top": 35,              # Vertical centering
-        "padding_bottom": 40,           # Top padding in bottom bar
-        # Typography - H1 System
-        "brand_font_size": 20,          # Label: 18-20px, SemiBold, uppercase
-        "brand_tracking": 0.25,         # +0.25em tracking
-        "tagline_font_size": 0,         # No tagline in top bar (cleaner)
-        "headline_font_size": 54,       # H1: 54px ExtraBold
-        "headline_tracking": -0.02,     # -0.02em tracking
-        "bullet_font_size": 28,         # Bullets: 28px Medium
-        "bullet_gap": 44,               # 16px spacing + line height
-        "max_bullets": 3,               # Maximum 3 bullets
-        "max_headline_lines": 2,        # Maximum 2 lines
-        "max_headline_chars": 60,       # ≤60 characters
-        "max_bullet_chars": 55,         # ≤55 characters per bullet
+        "top_bar_height": 100,          # Increased for visibility
+        "bottom_bar_height": 300,       # Increased for larger text
+        "padding": 60,
+        "padding_top": 32,
+        "padding_bottom": 44,
+        # Typography - LARGE for mobile
+        "brand_font_size": 38,          # MUCH LARGER - was 20
+        "brand_tracking": 0.25,
+        "tagline_font_size": 0,
+        "headline_font_size": 68,       # MUCH LARGER - was 54
+        "headline_tracking": -0.02,
+        "bullet_font_size": 40,         # MUCH LARGER - was 28
+        "bullet_gap": 54,
+        "max_bullets": 3,
+        "max_headline_lines": 2,
+        "max_headline_chars": 50,
+        "max_bullet_chars": 45,
     },
-    
     # =========================================================================
     # LINKEDIN MINIMAL - Even cleaner, for strong images
     # =========================================================================
@@ -129,27 +128,27 @@ CANVAS_PRESETS = {
     
     # =========================================================================
     # CAROUSEL - For carousel slides (concept-strong)
-    # Bigger headline, minimal bullets
+    # LARGE TEXT for mobile readability
     # =========================================================================
     "carousel": {
         "width": 1080,
         "height": 1350,
-        "top_bar_height": 80,
-        "bottom_bar_height": 200,
-        "padding": 70,
-        "padding_top": 28,
-        "padding_bottom": 36,
-        "brand_font_size": 18,
+        "top_bar_height": 100,          # Increased for visibility
+        "bottom_bar_height": 280,       # Increased for larger text
+        "padding": 60,
+        "padding_top": 32,
+        "padding_bottom": 44,
+        "brand_font_size": 36,          # MUCH LARGER - was 18
         "brand_tracking": 0.25,
         "tagline_font_size": 0,
-        "headline_font_size": 56,       # Larger for impact
+        "headline_font_size": 72,       # MUCH LARGER - was 56
         "headline_tracking": -0.02,
-        "bullet_font_size": 26,
-        "bullet_gap": 40,
-        "max_bullets": 2,               # Minimal bullets
+        "bullet_font_size": 42,         # MUCH LARGER - was 26
+        "bullet_gap": 56,
+        "max_bullets": 2,
         "max_headline_lines": 2,
-        "max_headline_chars": 50,
-        "max_bullet_chars": 50,
+        "max_headline_chars": 45,
+        "max_bullet_chars": 40,
     },
     
     # =========================================================================
@@ -178,27 +177,27 @@ CANVAS_PRESETS = {
     
     # =========================================================================
     # INSTAGRAM SQUARE - Prestige/Rendimension
-    # Even more minimal - Instagram is visual-first
+    # LARGE TEXT for mobile readability
     # =========================================================================
     "square": {
         "width": 1080,
         "height": 1080,
-        "top_bar_height": 70,
-        "bottom_bar_height": 200,       # Max 200px official
-        "padding": 60,
-        "padding_top": 24,
-        "padding_bottom": 32,
-        "brand_font_size": 16,
+        "top_bar_height": 90,
+        "bottom_bar_height": 240,
+        "padding": 55,
+        "padding_top": 28,
+        "padding_bottom": 36,
+        "brand_font_size": 32,          # LARGER
         "brand_tracking": 0.25,
         "tagline_font_size": 0,
-        "headline_font_size": 50,       # 50px official
+        "headline_font_size": 60,       # LARGER
         "headline_tracking": -0.02,
-        "bullet_font_size": 26,         # 26px official
-        "bullet_gap": 38,
+        "bullet_font_size": 36,         # LARGER
+        "bullet_gap": 48,
         "max_bullets": 2,
         "max_headline_lines": 2,
-        "max_headline_chars": 50,
-        "max_bullet_chars": 45,
+        "max_headline_chars": 40,
+        "max_bullet_chars": 40,
     },
     
     # =========================================================================
