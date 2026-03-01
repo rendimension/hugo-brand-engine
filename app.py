@@ -26,106 +26,154 @@ def pick_existing_path(*candidates: str) -> str:
             return p
     return candidates[0] if candidates else ""
 
-# Fonts: prefer repo root, fallback to /fonts
-FONT_BOLD_PATH = pick_existing_path(
-    os.path.join(BASE_DIR, 'Montserrat-Bold.ttf'),
-    os.path.join(BASE_DIR, 'fonts', 'Montserrat-Bold.ttf'),
+# Fonts: Inter Official Brand System
+# Hierarchy:
+# - ExtraBold (800): H1 Headlines
+# - Bold (700): H2 Secondary headlines  
+# - SemiBold (600): Labels, Brand text
+# - Medium (500): Bullets, body text
+
+FONT_EXTRABOLD_PATH = pick_existing_path(
+    os.path.join(BASE_DIR, 'Inter-ExtraBold.ttf'),
+    os.path.join(BASE_DIR, 'fonts', 'Inter-ExtraBold.ttf'),
 )
 
-FONT_REG_PATH = pick_existing_path(
-    os.path.join(BASE_DIR, 'Montserrat-Regular.ttf'),
-    os.path.join(BASE_DIR, 'Montserrat-VariableFont_wght.ttf'),
-    os.path.join(BASE_DIR, 'fonts', 'Montserrat-Regular.ttf'),
-    os.path.join(BASE_DIR, 'fonts', 'Montserrat-VariableFont_wght.ttf'),
+FONT_BOLD_PATH = pick_existing_path(
+    os.path.join(BASE_DIR, 'Inter-Bold.ttf'),
+    os.path.join(BASE_DIR, 'fonts', 'Inter-Bold.ttf'),
 )
 
 FONT_SEMIBOLD_PATH = pick_existing_path(
-    os.path.join(BASE_DIR, 'Montserrat-SemiBold.ttf'),
-    os.path.join(BASE_DIR, 'fonts', 'Montserrat-SemiBold.ttf'),
-    FONT_BOLD_PATH,  # fallback to bold
+    os.path.join(BASE_DIR, 'Inter-SemiBold.ttf'),
+    os.path.join(BASE_DIR, 'fonts', 'Inter-SemiBold.ttf'),
 )
 
-# If regular still does not exist but bold does, use bold as fallback
-if (not os.path.isfile(FONT_REG_PATH)) and os.path.isfile(FONT_BOLD_PATH):
-    FONT_REG_PATH = FONT_BOLD_PATH
+FONT_MEDIUM_PATH = pick_existing_path(
+    os.path.join(BASE_DIR, 'Inter-Medium.ttf'),
+    os.path.join(BASE_DIR, 'fonts', 'Inter-Medium.ttf'),
+)
+
+# Fallback chain
+FONT_REG_PATH = FONT_MEDIUM_PATH if os.path.isfile(FONT_MEDIUM_PATH) else FONT_BOLD_PATH
 
 os.makedirs(POST_IMAGE_DIR, exist_ok=True)
 os.makedirs(POST_OUTPUT_DIR, exist_ok=True)
 
 
 # =============================================================================
-# CANVAS PRESETS - Hugo Ramirez Brand System
+# CANVAS PRESETS - Hugo Ramirez Official Brand System
 # =============================================================================
-# Design Principle: Image = Protagonist, Frame = Support
-# Rule: Minimum 70% image visible, maximum 30% frame total
+# Design Principles:
+# - Image = Protagonist (minimum 75% visible)
+# - Frame = Support (maximum 25% total)
+# - Typography: Inter only, strict hierarchy
+# - Tracking: H1 -0.02em, Labels +0.25em
 #
-# Layout Philosophy:
-# - Top bar: Minimal branding, not a banner
-# - Image: Dominant, emotional, narrative
-# - Bottom: Headline + optional bullets, clean air
+# Typography Hierarchy:
+# - H1 (Headlines): Inter ExtraBold 800, 54px, tracking -0.02em
+# - H2 (Secondary): Inter Bold 700, tracking -0.01em
+# - Bullets: Inter Medium 500, 28px, tracking 0
+# - Labels: Inter SemiBold 600, uppercase, tracking +0.25em
 # =============================================================================
 
 CANVAS_PRESETS = {
     # =========================================================================
-    # LINKEDIN FEED - Primary Hugo format (4:5)
-    # 75% image visible
+    # LINKEDIN OFFICIAL V2 - Primary Hugo format (4:5)
+    # Canvas: 1080x1350 | Image: 1020px (75.5%) | Top: 90px | Bottom: 240px
     # =========================================================================
     "linkedin": {
         "width": 1080,
         "height": 1350,
-        "top_bar_height": 70,           # Reduced from 90 - minimal branding
-        "bottom_bar_height": 200,       # Reduced from 240 - cleaner
-        "padding": 60,
-        "padding_top": 24,              # Vertical centering in bars
-        "padding_bottom": 36,
-        "brand_font_size": 24,          # Smaller, more elegant
-        "tagline_font_size": 14,
-        "headline_font_size": 48,       # Strong but not overwhelming
-        "bullet_font_size": 26,
-        "bullet_gap": 40,
-        "max_bullets": 2,               # Maximum 2 bullets
-        "max_headline_lines": 2,
+        "top_bar_height": 90,           # Official: 90px
+        "bottom_bar_height": 240,       # Official: 240px
+        "padding": 80,                  # Official: 80px lateral
+        "padding_top": 35,              # Vertical centering
+        "padding_bottom": 40,           # Top padding in bottom bar
+        # Typography - H1 System
+        "brand_font_size": 20,          # Label: 18-20px, SemiBold, uppercase
+        "brand_tracking": 0.25,         # +0.25em tracking
+        "tagline_font_size": 0,         # No tagline in top bar (cleaner)
+        "headline_font_size": 54,       # H1: 54px ExtraBold
+        "headline_tracking": -0.02,     # -0.02em tracking
+        "bullet_font_size": 28,         # Bullets: 28px Medium
+        "bullet_gap": 44,               # 16px spacing + line height
+        "max_bullets": 3,               # Maximum 3 bullets
+        "max_headline_lines": 2,        # Maximum 2 lines
+        "max_headline_chars": 60,       # ≤60 characters
+        "max_bullet_chars": 55,         # ≤55 characters per bullet
     },
     
     # =========================================================================
-    # LINKEDIN CAROUSEL - Slide intermedias
-    # Concept-strong slides: bigger headline, no bullets
+    # LINKEDIN MINIMAL - Even cleaner, for strong images
+    # =========================================================================
+    "linkedin_minimal": {
+        "width": 1080,
+        "height": 1350,
+        "top_bar_height": 70,           # Reduced
+        "bottom_bar_height": 200,       # Compact
+        "padding": 70,
+        "padding_top": 25,
+        "padding_bottom": 36,
+        "brand_font_size": 18,
+        "brand_tracking": 0.25,
+        "tagline_font_size": 0,
+        "headline_font_size": 50,
+        "headline_tracking": -0.02,
+        "bullet_font_size": 26,
+        "bullet_gap": 40,
+        "max_bullets": 2,
+        "max_headline_lines": 2,
+        "max_headline_chars": 50,
+        "max_bullet_chars": 50,
+    },
+    
+    # =========================================================================
+    # CAROUSEL - For carousel slides (concept-strong)
+    # Bigger headline, minimal bullets
     # =========================================================================
     "carousel": {
         "width": 1080,
         "height": 1350,
-        "top_bar_height": 60,           # Even more minimal
-        "bottom_bar_height": 180,       # Compact
-        "padding": 60,
-        "padding_top": 20,
-        "padding_bottom": 32,
-        "brand_font_size": 22,
-        "tagline_font_size": 13,
-        "headline_font_size": 54,       # Larger for impact
+        "top_bar_height": 80,
+        "bottom_bar_height": 200,
+        "padding": 70,
+        "padding_top": 28,
+        "padding_bottom": 36,
+        "brand_font_size": 18,
+        "brand_tracking": 0.25,
+        "tagline_font_size": 0,
+        "headline_font_size": 56,       # Larger for impact
+        "headline_tracking": -0.02,
         "bullet_font_size": 26,
-        "bullet_gap": 38,
-        "max_bullets": 2,
+        "bullet_gap": 40,
+        "max_bullets": 2,               # Minimal bullets
         "max_headline_lines": 2,
+        "max_headline_chars": 50,
+        "max_bullet_chars": 50,
     },
     
     # =========================================================================
-    # CAROUSEL EDITORIAL - For explanatory slides with more text
+    # CAROUSEL TEXT - For explanatory slides with more content
     # =========================================================================
     "carousel_text": {
         "width": 1080,
         "height": 1350,
-        "top_bar_height": 60,
-        "bottom_bar_height": 260,       # Slightly larger for text
-        "padding": 60,
-        "padding_top": 20,
-        "padding_bottom": 32,
-        "brand_font_size": 22,
-        "tagline_font_size": 13,
-        "headline_font_size": 44,
-        "bullet_font_size": 24,
-        "bullet_gap": 36,
+        "top_bar_height": 70,
+        "bottom_bar_height": 280,
+        "padding": 70,
+        "padding_top": 24,
+        "padding_bottom": 36,
+        "brand_font_size": 18,
+        "brand_tracking": 0.25,
+        "tagline_font_size": 0,
+        "headline_font_size": 46,
+        "headline_tracking": -0.01,
+        "bullet_font_size": 26,
+        "bullet_gap": 40,
         "max_bullets": 3,
         "max_headline_lines": 2,
+        "max_headline_chars": 60,
+        "max_bullet_chars": 55,
     },
     
     # =========================================================================
@@ -135,80 +183,71 @@ CANVAS_PRESETS = {
     "square": {
         "width": 1080,
         "height": 1080,
-        "top_bar_height": 55,           # Very minimal
-        "bottom_bar_height": 160,       # Compact
-        "padding": 55,
-        "padding_top": 16,
-        "padding_bottom": 28,
-        "brand_font_size": 20,
-        "tagline_font_size": 12,
-        "headline_font_size": 42,
-        "bullet_font_size": 24,
-        "bullet_gap": 36,
+        "top_bar_height": 70,
+        "bottom_bar_height": 200,       # Max 200px official
+        "padding": 60,
+        "padding_top": 24,
+        "padding_bottom": 32,
+        "brand_font_size": 16,
+        "brand_tracking": 0.25,
+        "tagline_font_size": 0,
+        "headline_font_size": 50,       # 50px official
+        "headline_tracking": -0.02,
+        "bullet_font_size": 26,         # 26px official
+        "bullet_gap": 38,
         "max_bullets": 2,
         "max_headline_lines": 2,
+        "max_headline_chars": 50,
+        "max_bullet_chars": 45,
     },
     
     # =========================================================================
     # INSTAGRAM VERTICAL - Reels cover or 4:5 post
-    # Most minimal - image speaks
+    # Most minimal - headline only
     # =========================================================================
     "instagram_vertical": {
         "width": 1080,
         "height": 1350,
-        "top_bar_height": 50,           # Ultra minimal
-        "bottom_bar_height": 160,       # Very compact
-        "padding": 55,
-        "padding_top": 14,
-        "padding_bottom": 28,
-        "brand_font_size": 20,
-        "tagline_font_size": 12,
-        "headline_font_size": 50,       # Strong headline only
+        "top_bar_height": 60,
+        "bottom_bar_height": 180,
+        "padding": 60,
+        "padding_top": 20,
+        "padding_bottom": 32,
+        "brand_font_size": 16,
+        "brand_tracking": 0.25,
+        "tagline_font_size": 0,
+        "headline_font_size": 52,
+        "headline_tracking": -0.02,
         "bullet_font_size": 24,
-        "bullet_gap": 34,
+        "bullet_gap": 36,
         "max_bullets": 0,               # No bullets - headline only
         "max_headline_lines": 2,
+        "max_headline_chars": 45,
+        "max_bullet_chars": 0,
     },
     
     # =========================================================================
-    # LANDSCAPE - For specific use cases
+    # LANDSCAPE - Horizontal format
     # =========================================================================
     "landscape": {
         "width": 1200,
         "height": 675,
-        "top_bar_height": 45,
-        "bottom_bar_height": 110,
-        "padding": 45,
-        "padding_top": 12,
-        "padding_bottom": 24,
-        "brand_font_size": 18,
-        "tagline_font_size": 11,
-        "headline_font_size": 32,
-        "bullet_font_size": 20,
-        "bullet_gap": 30,
+        "top_bar_height": 50,
+        "bottom_bar_height": 120,
+        "padding": 50,
+        "padding_top": 16,
+        "padding_bottom": 26,
+        "brand_font_size": 16,
+        "brand_tracking": 0.25,
+        "tagline_font_size": 0,
+        "headline_font_size": 36,
+        "headline_tracking": -0.02,
+        "bullet_font_size": 22,
+        "bullet_gap": 32,
         "max_bullets": 2,
         "max_headline_lines": 1,
-    },
-    
-    # =========================================================================
-    # ULTRA MINIMAL - Maximum image, barely any frame
-    # For when image must absolutely dominate
-    # =========================================================================
-    "minimal": {
-        "width": 1080,
-        "height": 1350,
-        "top_bar_height": 0,            # No top bar
-        "bottom_bar_height": 140,       # Just headline area
-        "padding": 50,
-        "padding_top": 0,
-        "padding_bottom": 24,
-        "brand_font_size": 0,           # No branding
-        "tagline_font_size": 0,
-        "headline_font_size": 46,
-        "bullet_font_size": 0,          # No bullets
-        "bullet_gap": 0,
-        "max_bullets": 0,
-        "max_headline_lines": 2,
+        "max_headline_chars": 45,
+        "max_bullet_chars": 40,
     },
 }
 
@@ -244,65 +283,58 @@ BAND_ALPHA = 210
 # =============================================================================
 # COLOR SCHEMES - Hugo Ramirez Brand Identity
 # =============================================================================
-# Brand Colors from Landing Page:
-# Primary Blue: #0f4c81 (15, 76, 129)
-# Executive Navy: #1a1c20 (26, 28, 32)
-# Pure Black: #111111 (17, 17, 17)
+# Official Brand Colors:
+# Primary Navy: #0F1A2B (15, 26, 43) - Top bar, frames
+# Executive Navy: #1a1c20 (26, 28, 32) - Alternative
+# Pure Black: #111111 (17, 17, 17) - Deep dark
+# Primary Blue: #0f4c81 (15, 76, 129) - Accent
 # Background Light: #fcfcfc (252, 252, 252)
-# Slate 400: #94a3b8 (148, 163, 184)
-# Slate 500: #64748b (100, 116, 139)
-# Slate 600: #475569 (71, 85, 105)
 
 THEMES = {
     "dark": {
-        # Main theme - Dark bars with white text (LinkedIn optimized)
-        "bar_color": (17, 17, 17),  # #111111 - Pure Black
-        "bar_alpha": 235,
+        # Official Hugo Brand - Navy Deep
+        "bar_color": (15, 26, 43),  # #0F1A2B - Primary Navy (official)
+        "bar_alpha": 255,  # Solid, no transparency
         "brand_color": (255, 255, 255),  # White
         "tagline_color": (148, 163, 184),  # Slate 400
-        "title_color": (255, 255, 255),  # White
         "headline_color": (255, 255, 255),  # White
         "bullet_color": (203, 213, 225),  # Slate 300
     },
     "executive": {
-        # Executive Navy theme - More sophisticated
+        # Executive Navy theme
         "bar_color": (26, 28, 32),  # #1a1c20 - Executive Navy
-        "bar_alpha": 240,
-        "brand_color": (255, 255, 255),  # White
-        "tagline_color": (148, 163, 184),  # Slate 400
-        "title_color": (255, 255, 255),  # White
-        "headline_color": (255, 255, 255),  # White
-        "bullet_color": (203, 213, 225),  # Slate 300
+        "bar_alpha": 255,
+        "brand_color": (255, 255, 255),
+        "tagline_color": (148, 163, 184),
+        "headline_color": (255, 255, 255),
+        "bullet_color": (203, 213, 225),
     },
     "brand": {
         # Primary Blue accent theme
         "bar_color": (15, 76, 129),  # #0f4c81 - Primary Blue
-        "bar_alpha": 240,
-        "brand_color": (255, 255, 255),  # White
-        "tagline_color": (203, 213, 225),  # Slate 300
-        "title_color": (255, 255, 255),  # White
-        "headline_color": (255, 255, 255),  # White
-        "bullet_color": (226, 232, 240),  # Slate 200
+        "bar_alpha": 255,
+        "brand_color": (255, 255, 255),
+        "tagline_color": (203, 213, 225),
+        "headline_color": (255, 255, 255),
+        "bullet_color": (226, 232, 240),
+    },
+    "pure_black": {
+        # Pure black for maximum contrast
+        "bar_color": (17, 17, 17),  # #111111
+        "bar_alpha": 255,
+        "brand_color": (255, 255, 255),
+        "tagline_color": (148, 163, 184),
+        "headline_color": (255, 255, 255),
+        "bullet_color": (203, 213, 225),
     },
     "light": {
-        # Light theme - for specific use cases
-        "bar_color": (244, 244, 245),  # #f4f4f5 - Background Off
-        "bar_alpha": 245,
-        "brand_color": (26, 28, 32),  # Executive Navy
-        "tagline_color": (100, 116, 139),  # Slate 500
-        "title_color": (15, 23, 42),  # Slate 900
-        "headline_color": (30, 41, 59),  # Slate 800
-        "bullet_color": (71, 85, 105),  # Slate 600
-    },
-    "minimal": {
-        # Minimal - very subtle, almost transparent
-        "bar_color": (252, 252, 252),  # #fcfcfc - Background Light
-        "bar_alpha": 220,
-        "brand_color": (17, 17, 17),  # Pure Black
-        "tagline_color": (100, 116, 139),  # Slate 500
-        "title_color": (15, 23, 42),  # Slate 900
-        "headline_color": (26, 28, 32),  # Executive Navy
-        "bullet_color": (71, 85, 105),  # Slate 600
+        # Light theme - for dark images
+        "bar_color": (244, 244, 245),  # #f4f4f5
+        "bar_alpha": 250,
+        "brand_color": (15, 26, 43),  # Navy
+        "tagline_color": (100, 116, 139),
+        "headline_color": (15, 23, 42),
+        "bullet_color": (71, 85, 105),
     },
 }
 
@@ -517,23 +549,25 @@ def render_slide(
     canvas = Image.alpha_composite(canvas, overlay)
     draw = ImageDraw.Draw(canvas)
     
-    # Load fonts
-    brand_font = load_font(FONT_BOLD_PATH, preset["brand_font_size"])
-    tagline_font = load_font(FONT_REG_PATH, preset["tagline_font_size"])
-    headline_font = load_font(FONT_BOLD_PATH, preset["headline_font_size"])
-    bullet_font = load_font(FONT_REG_PATH, preset["bullet_font_size"])
+    # Load fonts with correct weights per hierarchy
+    # Brand text: SemiBold (600) - for top bar label
+    brand_font = load_font(FONT_SEMIBOLD_PATH, preset["brand_font_size"])
     
-    # Draw brand name (top left) - only if top bar exists and font size > 0
+    # Headlines: ExtraBold (800) - for H1
+    headline_font = load_font(FONT_EXTRABOLD_PATH, preset["headline_font_size"])
+    
+    # Bullets: Medium (500) - for body text
+    bullet_font = load_font(FONT_MEDIUM_PATH, preset["bullet_font_size"])
+    
+    # Draw brand name (top left) - UPPERCASE with tracking
+    # Label style: SemiBold, uppercase, tracking +0.25em
     if top_bar_h > 0 and preset["brand_font_size"] > 0:
         brand_y = (top_bar_h - preset["brand_font_size"]) // 2
-        draw.text((padding, brand_y), brand_name, font=brand_font, fill=theme["brand_color"])
+        brand_text = brand_name.upper()  # Always uppercase for labels
+        draw.text((padding, brand_y), brand_text, font=brand_font, fill=theme["brand_color"])
     
-    # Draw tagline (top right) - only if top bar exists
-    if top_bar_h > 0 and tagline and preset["tagline_font_size"] > 0:
-        tagline_bbox = draw.textbbox((0, 0), tagline, font=tagline_font)
-        tagline_width = tagline_bbox[2] - tagline_bbox[0]
-        tagline_y = (top_bar_h - preset["tagline_font_size"]) // 2 + 2
-        draw.text((width - padding - tagline_width, tagline_y), tagline, font=tagline_font, fill=theme["tagline_color"])
+    # Note: Tagline removed from official system for cleaner look
+    # Top bar is now just the brand label (uppercase, minimal)
     
     # Calculate bottom section layout
     bottom_start_y = height - bottom_bar_h + padding_bottom
