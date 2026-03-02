@@ -1,4 +1,4 @@
-# v3.1 force
+# v3.2 final adjustments
 from flask import Flask, request, send_file, jsonify, send_from_directory
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -23,10 +23,9 @@ POST_OUTPUT_DIR = os.path.join(BASE_DIR, 'post_output')
 os.makedirs(POST_OUTPUT_DIR, exist_ok=True)
 
 # =========================
-# Font Configuration - SAME AS PRESTIGE
+# Font Configuration
 # =========================
 FONT_BOLD_PATH = "Montserrat-Bold.ttf"
-FONT_REGULAR_PATH = "Montserrat-VariableFont_wght.ttf"
 
 # =========================
 # Colors
@@ -34,15 +33,7 @@ FONT_REGULAR_PATH = "Montserrat-VariableFont_wght.ttf"
 WHITE = (255, 255, 255)
 
 # =========================
-# Font Sizes - ADJUSTED
-# =========================
-BRAND_FONT_SIZE = 42
-TAGLINE_FONT_SIZE = 28      # Increased from 22
-TITLE_FONT_SIZE = 40
-SUBTITLE_FONT_SIZE = 38     # Increased from 32
-
-# =========================
-# Load Fonts AT STARTUP with HARDCODED sizes
+# Load Fonts AT STARTUP - ALL USING BOLD for better visibility
 # =========================
 try:
     brand_font = ImageFont.truetype(FONT_BOLD_PATH, 42)
@@ -52,8 +43,8 @@ except Exception as e:
     brand_font = ImageFont.load_default()
 
 try:
-    tagline_font = ImageFont.truetype(FONT_REGULAR_PATH, 28)  # BIGGER
-    print(f"✅ tagline_font loaded at 28px")
+    tagline_font = ImageFont.truetype(FONT_BOLD_PATH, 26)  # BOLD for visibility
+    print(f"✅ tagline_font loaded at 26px BOLD")
 except Exception as e:
     print(f"❌ tagline_font error: {e}")
     tagline_font = ImageFont.load_default()
@@ -66,25 +57,25 @@ except Exception as e:
     title_font = ImageFont.load_default()
 
 try:
-    subtitle_font = ImageFont.truetype(FONT_REGULAR_PATH, 38)  # BIGGER
-    print(f"✅ subtitle_font loaded at 38px")
+    subtitle_font = ImageFont.truetype(FONT_BOLD_PATH, 32)  # BOLD + 15% smaller (was 38)
+    print(f"✅ subtitle_font loaded at 32px BOLD")
 except Exception as e:
     print(f"❌ subtitle_font error: {e}")
     subtitle_font = ImageFont.load_default()
 
 # =========================
-# Layout Configuration - ADJUSTED
+# Layout Configuration
 # =========================
 CANVAS_WIDTH = 1080
 CANVAS_HEIGHT = 1350
 MARGIN_LEFT = 50
 MARGIN_RIGHT = 50
 BRAND_Y = 35
-TAGLINE_Y = 35              # Aligned with brand (was 42)
+TAGLINE_Y = 40              # Slightly lower to align better with brand
 TITLE_Y = 1195
 SUBTITLE_Y = 1255
-HEADER_HEIGHT = 150         # Bigger gradient area
-FOOTER_HEIGHT = 250         # Bigger gradient area
+HEADER_HEIGHT = 150
+FOOTER_HEIGHT = 250
 
 
 def cleanup_old_images():
@@ -114,7 +105,6 @@ def create_gradient_top_dark(width, height, alpha_max):
     """Create gradient: DARK at TOP, fades to transparent at BOTTOM"""
     gradient = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     for y in range(height):
-        # Inverted: starts dark, ends transparent
         alpha = int(alpha_max * (1 - y / height))
         for x in range(width):
             gradient.putpixel((x, y), (0, 0, 0, alpha))
@@ -125,7 +115,6 @@ def create_gradient_bottom_dark(width, height, alpha_max):
     """Create gradient: transparent at TOP, DARK at BOTTOM"""
     gradient = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     for y in range(height):
-        # Normal: starts transparent, ends dark
         alpha = int(alpha_max * (y / height))
         for x in range(width):
             gradient.putpixel((x, y), (0, 0, 0, alpha))
@@ -211,11 +200,10 @@ def render_slide(image_source, brand_name="HUGO RAMIREZ", tagline="Design • St
 def home():
     return jsonify({
         "service": "Hugo Brand Engine",
-        "version": "3.1",
+        "version": "3.2",
         "status": "running",
         "fonts": {
             "Montserrat-Bold": os.path.isfile(FONT_BOLD_PATH),
-            "Montserrat-Variable": os.path.isfile(FONT_REGULAR_PATH),
         },
         "images_in_cache": len(generated_images)
     })
@@ -225,7 +213,7 @@ def home():
 def health():
     return jsonify({
         'status': 'ok',
-        'version': '3.1',
+        'version': '3.2',
         'images_in_cache': len(generated_images)
     })
 
@@ -341,5 +329,5 @@ def generate_post():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
-    print(f"🚀 Hugo Brand Engine v3.1 starting on port {port}")
+    print(f"🚀 Hugo Brand Engine v3.2 starting on port {port}")
     app.run(host='0.0.0.0', port=port, debug=False)
