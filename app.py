@@ -78,14 +78,14 @@ DESIGN_SYSTEM = {
         "header_height": 108,  # 0px to 108px
         "header_opacity": 0.10,  # 10%
         "header_gradient_color1": (167, 166, 221, 13),  # #A7A6DD with low alpha
-        "header_gradient_color2": (0, 0, 0, 170),  # #AA000000
+        "header_gradient_color2": (0, 0, 0, 110),  # #AA000000
         
         # Footer (Bottom gradient bar)
         "footer_start": 1167,  # starts at 1167px
         "footer_height": 183,  # 1167px to 1350px
         "footer_opacity": 0.30,  # 30%
         "footer_gradient_color1": (167, 166, 221, 0),  # #A7A6DD00
-        "footer_gradient_color2": (0, 0, 0, 255),  # #000000
+        "footer_gradient_color2": (0, 0, 0, 200),  # #000000
         
         # Content margins
         "margin_left": 108,
@@ -94,23 +94,23 @@ DESIGN_SYSTEM = {
         
         # Typography - Header
         "brand_font": "extrabold",
-        "brand_size": 20,
+        "brand_size": 60,
         "brand_letter_spacing": 134,  # Canva units (134%)
         "brand_y": 43,  # top of text at 43px, bottom at ~75px
         "brand_color": (255, 255, 255),
         
         "tagline_font": "regular",
-        "tagline_size": 20.5,
+        "tagline_size": 36,
         "tagline_color": (255, 255, 255),
         
         # Typography - Footer
         "title_font": "semibold",
-        "title_size": 20,
+        "title_size": 42,
         "title_y": 1203,  # 1203px to 1235px
         "title_color": (255, 255, 255),
         
         "subtitle_font": "light",
-        "subtitle_size": 20,
+        "subtitle_size": 36,
         "subtitle_y": 1258,  # starts at 1258px
         "subtitle_color": (255, 255, 255),
     }
