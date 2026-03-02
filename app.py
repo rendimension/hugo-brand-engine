@@ -8,7 +8,7 @@ import base64
 from io import BytesIO
 from urllib.parse import urlparse
 
-print("🧠 Hugo Brand Engine v2.1 - Canva Specs Edition")
+print("🧠 Hugo Brand Engine v2.2 - Canva Specs Corrected")
 
 app = Flask(__name__)
 
@@ -66,6 +66,7 @@ os.makedirs(POST_OUTPUT_DIR, exist_ok=True)
 # =============================================================================
 # Exact specifications from Canva design
 # Canvas: 1080 x 1350 px
+# Gradient colors from Canva: #A7A6DC (purple) to #000000 (black)
 # =============================================================================
 
 DESIGN_SYSTEM = {
@@ -75,17 +76,19 @@ DESIGN_SYSTEM = {
         "height": 1350,
         
         # Header (Top gradient bar)
+        # Canva: Linear gradient 180°, 10% opacity
+        # Goes from transparent at top to dark at bottom
         "header_height": 108,  # 0px to 108px
-        "header_opacity": 0.10,  # 10%
-        "header_gradient_color1": (167, 166, 221, 13),  # #A7A6DD with low alpha
-        "header_gradient_color2": (0, 0, 0, 110),  # #AA000000
+        "header_gradient_color1": (0, 0, 0, 0),       # Top: fully transparent
+        "header_gradient_color2": (0, 0, 0, 100),     # Bottom: subtle dark (10% feel)
         
         # Footer (Bottom gradient bar)
+        # Canva: Linear gradient 180°, 30% opacity
+        # Goes from transparent at top to dark at bottom
         "footer_start": 1167,  # starts at 1167px
         "footer_height": 183,  # 1167px to 1350px
-        "footer_opacity": 0.30,  # 30%
-        "footer_gradient_color1": (167, 166, 221, 0),  # #A7A6DD00
-        "footer_gradient_color2": (0, 0, 0, 200),  # #000000
+        "footer_gradient_color1": (0, 0, 0, 0),       # Top: fully transparent
+        "footer_gradient_color2": (0, 0, 0, 200),     # Bottom: darker (30% feel)
         
         # Content margins
         "margin_left": 108,
@@ -93,26 +96,31 @@ DESIGN_SYSTEM = {
         "content_width": 864,
         
         # Typography - Header
+        # HUGO RAMIREZ: Inter ExtraBold, size 20 in Canva = ~60px at 1080p
         "brand_font": "extrabold",
-        "brand_size": 60,
-        "brand_letter_spacing": 134,  # Canva units (134%)
-        "brand_y": 43,  # top of text at 43px, bottom at ~75px
+        "brand_size": 48,              # Adjusted for visibility
+        "brand_letter_spacing": 134,   # Canva units
+        "brand_y": 35,                 # Centered in 108px header
         "brand_color": (255, 255, 255),
         
+        # Tagline: Inter Regular, size 20.5 in Canva
         "tagline_font": "regular",
-        "tagline_size": 36,
+        "tagline_size": 28,            # Adjusted for visibility
+        "tagline_y": 42,               # Aligned with brand
         "tagline_color": (255, 255, 255),
         
         # Typography - Footer
+        # Title: Inter SemiBold, size 20 in Canva = ~48px at 1080p
         "title_font": "semibold",
-        "title_size": 42,
-        "title_y": 1203,  # 1203px to 1235px
+        "title_size": 42,              # Good visibility
+        "title_y": 1200,               # Position in footer
         "title_color": (255, 255, 255),
         
+        # Subtitle: Inter Light, size 20 in Canva
         "subtitle_font": "light",
-        "subtitle_size": 36,
-        "subtitle_y": 1258,  # starts at 1258px
-        "subtitle_color": (255, 255, 255),
+        "subtitle_size": 32,           # Slightly smaller than title
+        "subtitle_y": 1260,            # Below title
+        "subtitle_color": (255, 255, 255, 220),  # Slightly transparent
     }
 }
 
@@ -193,16 +201,6 @@ def fit_cover(img: Image.Image, target_w: int, target_h: int) -> Image.Image:
     return img.crop((left, top, left + target_w, top + target_h))
 
 
-def add_letter_spacing(text: str, spacing: int) -> str:
-    """Add spacing between letters. Spacing in Canva units (134 ≈ 13.4% extra space)"""
-    # For now, we'll handle this in the drawing by adding spaces
-    # Canva spacing 134 = add thin spaces between characters
-    if spacing > 100:
-        # Add hair space between characters
-        return '  '.join(text)  # Double space between chars for visual effect
-    return text
-
-
 def render_slide_v2(
     image_path: str,
     preset_name: str = "carousel",
@@ -278,9 +276,10 @@ def render_slide_v2(
         tagline_bbox = draw.textbbox((0, 0), tagline, font=tagline_font)
         tagline_width = tagline_bbox[2] - tagline_bbox[0]
         tagline_x = width - margin_left - tagline_width
+        tagline_y = specs.get("tagline_y", specs["brand_y"])
         
         draw.text(
-            (tagline_x, specs["brand_y"]),
+            (tagline_x, tagline_y),
             tagline,
             font=tagline_font,
             fill=specs["tagline_color"]
@@ -301,11 +300,15 @@ def render_slide_v2(
     # Subtitle
     if subtitle:
         subtitle_font = load_font(specs["subtitle_font"], specs["subtitle_size"])
+        subtitle_color = specs["subtitle_color"]
+        # Handle RGBA color
+        if len(subtitle_color) == 4:
+            subtitle_color = subtitle_color[:3]  # PIL text needs RGB
         draw.text(
             (margin_left, specs["subtitle_y"]),
             subtitle,
             font=subtitle_font,
-            fill=specs["subtitle_color"]
+            fill=subtitle_color
         )
     
     # Save output
@@ -326,14 +329,17 @@ def render_slide_v2(
 def home():
     return jsonify({
         "service": "Hugo Brand Engine",
-        "version": "2.1 - Canva Specs Edition",
+        "version": "2.2 - Canva Specs Corrected",
         "status": "running",
         "design_system": {
             "canvas": "1080x1350",
-            "header": "108px gradient 10%",
-            "footer": "183px gradient 30%",
+            "header": "108px gradient transparent->dark",
+            "footer": "183px gradient transparent->dark",
             "margins": "108px left/right",
-            "fonts": "Inter family"
+            "fonts": "Inter family",
+            "brand_size": 48,
+            "title_size": 42,
+            "subtitle_size": 32
         },
         "endpoints": {
             "health": "/health",
@@ -344,7 +350,7 @@ def home():
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "healthy", "version": "2.1"})
+    return jsonify({"status": "healthy", "version": "2.2"})
 
 
 @app.route("/post_output/<filename>")
