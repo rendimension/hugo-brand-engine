@@ -98,27 +98,27 @@ DESIGN_SYSTEM = {
         # Typography - Header
         # HUGO RAMIREZ: Inter ExtraBold, size 20 in Canva = ~60px at 1080p
         "brand_font": "extrabold",
-        "brand_size": 48,              # Adjusted for visibility
+        "brand_size": 92,              # Adjusted for visibility
         "brand_letter_spacing": 134,   # Canva units
         "brand_y": 35,                 # Centered in 108px header
         "brand_color": (255, 255, 255),
         
         # Tagline: Inter Regular, size 20.5 in Canva
         "tagline_font": "regular",
-        "tagline_size": 28,            # Adjusted for visibility
+        "tagline_size": 85,            # Adjusted for visibility
         "tagline_y": 42,               # Aligned with brand
         "tagline_color": (255, 255, 255),
         
         # Typography - Footer
         # Title: Inter SemiBold, size 20 in Canva = ~48px at 1080p
         "title_font": "semibold",
-        "title_size": 42,              # Good visibility
+        "title_size": 72,              # Good visibility
         "title_y": 1200,               # Position in footer
         "title_color": (255, 255, 255),
         
         # Subtitle: Inter Light, size 20 in Canva
         "subtitle_font": "light",
-        "subtitle_size": 32,           # Slightly smaller than title
+        "subtitle_size": 68,           # Slightly smaller than title
         "subtitle_y": 1260,            # Below title
         "subtitle_color": (255, 255, 255, 220),  # Slightly transparent
     }
