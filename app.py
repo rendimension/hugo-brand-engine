@@ -36,9 +36,9 @@ WHITE = (255, 255, 255)
 # Font Sizes
 # =========================
 BRAND_FONT_SIZE = 42
-TAGLINE_FONT_SIZE = 22
+TAGLINE_FONT_SIZE = 38
 TITLE_FONT_SIZE = 40
-SUBTITLE_FONT_SIZE = 32
+SUBTITLE_FONT_SIZE = 42
 
 # =========================
 # Load Fonts AT STARTUP (exactly like Prestige)
@@ -79,11 +79,11 @@ CANVAS_HEIGHT = 1350
 MARGIN_LEFT = 50
 MARGIN_RIGHT = 50
 BRAND_Y = 35
-TAGLINE_Y = 42
+TAGLINE_Y = 30
 TITLE_Y = 1195
 SUBTITLE_Y = 1260
 HEADER_HEIGHT = 120
-FOOTER_HEIGHT = 200
+FOOTER_HEIGHT = 250
 
 
 def cleanup_old_images():
@@ -140,11 +140,11 @@ def render_slide(image_source, brand_name="HUGO RAMIREZ", tagline="Design • St
     canvas.paste(fitted, (0, 0))
     
     # Add header gradient
-    header_gradient = create_gradient(CANVAS_WIDTH, HEADER_HEIGHT, 0, 60)
+    header_gradient = create_gradient(CANVAS_WIDTH, HEADER_HEIGHT, 0, 120)
     canvas.alpha_composite(header_gradient, (0, 0))
     
     # Add footer gradient
-    footer_gradient = create_gradient(CANVAS_WIDTH, FOOTER_HEIGHT, 0, 100)
+    footer_gradient = create_gradient(CANVAS_WIDTH, FOOTER_HEIGHT, 0, 180)
     canvas.alpha_composite(footer_gradient, (0, CANVAS_HEIGHT - FOOTER_HEIGHT))
     
     # Draw text
