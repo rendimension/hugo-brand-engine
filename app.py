@@ -1,4 +1,4 @@
-# v3.2 final adjustments
+# v3.3 text wrapping + softer subtitle
 from flask import Flask, request, send_file, jsonify, send_from_directory
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -11,7 +11,7 @@ import requests
 app = Flask(__name__)
 
 # =========================
-# Storage for generated images (in-memory, temporary)
+# Storage for generated images
 # =========================
 generated_images = {}
 
@@ -31,9 +31,18 @@ FONT_BOLD_PATH = "Montserrat-Bold.ttf"
 # Colors
 # =========================
 WHITE = (255, 255, 255)
+SUBTITLE_COLOR = (220, 220, 220)  # Lighter gray - less visual weight
 
 # =========================
-# Load Fonts AT STARTUP - ALL USING BOLD for better visibility
+# Text Control Variables
+# =========================
+TITLE_MAX_WIDTH = 980       # Max pixels width for title
+TITLE_MAX_LINES = 2         # Max lines for title
+SUBTITLE_MAX_WIDTH = 980    # Max pixels width for subtitle
+SUBTITLE_MAX_LINES = 2      # Max lines for subtitle
+
+# =========================
+# Load Fonts AT STARTUP
 # =========================
 try:
     brand_font = ImageFont.truetype(FONT_BOLD_PATH, 42)
@@ -43,8 +52,8 @@ except Exception as e:
     brand_font = ImageFont.load_default()
 
 try:
-    tagline_font = ImageFont.truetype(FONT_BOLD_PATH, 26)  # BOLD for visibility
-    print(f"✅ tagline_font loaded at 26px BOLD")
+    tagline_font = ImageFont.truetype(FONT_BOLD_PATH, 26)
+    print(f"✅ tagline_font loaded at 26px")
 except Exception as e:
     print(f"❌ tagline_font error: {e}")
     tagline_font = ImageFont.load_default()
@@ -57,8 +66,8 @@ except Exception as e:
     title_font = ImageFont.load_default()
 
 try:
-    subtitle_font = ImageFont.truetype(FONT_BOLD_PATH, 32)  # BOLD + 15% smaller (was 38)
-    print(f"✅ subtitle_font loaded at 32px BOLD")
+    subtitle_font = ImageFont.truetype(FONT_BOLD_PATH, 28)  # Smaller than before
+    print(f"✅ subtitle_font loaded at 28px")
 except Exception as e:
     print(f"❌ subtitle_font error: {e}")
     subtitle_font = ImageFont.load_default()
@@ -71,11 +80,12 @@ CANVAS_HEIGHT = 1350
 MARGIN_LEFT = 50
 MARGIN_RIGHT = 50
 BRAND_Y = 35
-TAGLINE_Y = 40              # Slightly lower to align better with brand
-TITLE_Y = 1195
-SUBTITLE_Y = 1255
+TAGLINE_Y = 40
+TITLE_Y = 1180              # Moved up slightly to allow for 2 lines
+SUBTITLE_Y = 1230           # Will be calculated dynamically
+LINE_SPACING = 8            # Space between lines
 HEADER_HEIGHT = 150
-FOOTER_HEIGHT = 250
+FOOTER_HEIGHT = 280         # Increased for multi-line text
 
 
 def cleanup_old_images():
@@ -90,7 +100,7 @@ def cleanup_old_images():
 
 
 def fit_cover(img, target_w, target_h):
-    """Scale and crop to fill (like CSS object-fit: cover)"""
+    """Scale and crop to fill"""
     img_w, img_h = img.size
     scale = max(target_w / img_w, target_h / img_h)
     new_w = int(img_w * scale)
@@ -102,7 +112,7 @@ def fit_cover(img, target_w, target_h):
 
 
 def create_gradient_top_dark(width, height, alpha_max):
-    """Create gradient: DARK at TOP, fades to transparent at BOTTOM"""
+    """Create gradient: DARK at TOP, fades to transparent"""
     gradient = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     for y in range(height):
         alpha = int(alpha_max * (1 - y / height))
@@ -112,7 +122,7 @@ def create_gradient_top_dark(width, height, alpha_max):
 
 
 def create_gradient_bottom_dark(width, height, alpha_max):
-    """Create gradient: transparent at TOP, DARK at BOTTOM"""
+    """Create gradient: transparent to DARK at BOTTOM"""
     gradient = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     for y in range(height):
         alpha = int(alpha_max * (y / height))
@@ -121,13 +131,74 @@ def create_gradient_bottom_dark(width, height, alpha_max):
     return gradient
 
 
+def wrap_text(text, font, max_width, draw):
+    """
+    Wrap text to fit within max_width.
+    Returns list of lines.
+    """
+    words = text.split()
+    lines = []
+    current_line = []
+    
+    for word in words:
+        # Test if adding this word exceeds max width
+        test_line = ' '.join(current_line + [word])
+        bbox = draw.textbbox((0, 0), test_line, font=font)
+        width = bbox[2] - bbox[0]
+        
+        if width <= max_width:
+            current_line.append(word)
+        else:
+            # Save current line and start new one
+            if current_line:
+                lines.append(' '.join(current_line))
+            current_line = [word]
+    
+    # Don't forget the last line
+    if current_line:
+        lines.append(' '.join(current_line))
+    
+    return lines
+
+
+def truncate_lines(lines, max_lines, font, max_width, draw):
+    """
+    Truncate to max_lines. If truncated, add '...' to last line.
+    """
+    if len(lines) <= max_lines:
+        return lines
+    
+    # Take only max_lines
+    truncated = lines[:max_lines]
+    
+    # Add '...' to last line if it fits, otherwise truncate last line
+    last_line = truncated[-1]
+    while True:
+        test_line = last_line + '...'
+        bbox = draw.textbbox((0, 0), test_line, font=font)
+        width = bbox[2] - bbox[0]
+        
+        if width <= max_width:
+            truncated[-1] = test_line
+            break
+        else:
+            # Remove last word and try again
+            words = last_line.split()
+            if len(words) <= 1:
+                truncated[-1] = '...'
+                break
+            last_line = ' '.join(words[:-1])
+    
+    return truncated
+
+
 def render_slide(image_source, brand_name="HUGO RAMIREZ", tagline="Design • Strategy • Immersive Systems", headline="", subtitle=""):
     """Render slide with Hugo branding"""
     
     # Create canvas
     canvas = Image.new("RGBA", (CANVAS_WIDTH, CANVAS_HEIGHT), (0, 0, 0, 255))
     
-    # Load image from various sources
+    # Load image
     if isinstance(image_source, Image.Image):
         photo = image_source
     elif isinstance(image_source, bytes):
@@ -141,12 +212,12 @@ def render_slide(image_source, brand_name="HUGO RAMIREZ", tagline="Design • St
     fitted = fit_cover(photo, CANVAS_WIDTH, CANVAS_HEIGHT)
     canvas.paste(fitted, (0, 0))
     
-    # Add header gradient - DARK AT TOP, fades down
+    # Add header gradient
     header_gradient = create_gradient_top_dark(CANVAS_WIDTH, HEADER_HEIGHT, 150)
     canvas.alpha_composite(header_gradient, (0, 0))
     
-    # Add footer gradient - fades to DARK AT BOTTOM
-    footer_gradient = create_gradient_bottom_dark(CANVAS_WIDTH, FOOTER_HEIGHT, 200)
+    # Add footer gradient
+    footer_gradient = create_gradient_bottom_dark(CANVAS_WIDTH, FOOTER_HEIGHT, 220)
     canvas.alpha_composite(footer_gradient, (0, CANVAS_HEIGHT - FOOTER_HEIGHT))
     
     # Draw text
@@ -160,7 +231,7 @@ def render_slide(image_source, brand_name="HUGO RAMIREZ", tagline="Design • St
         fill=WHITE
     )
     
-    # Tagline (top right) - aligned with brand
+    # Tagline (top right)
     if tagline:
         bbox = draw.textbbox((0, 0), tagline, font=tagline_font)
         tagline_w = bbox[2] - bbox[0]
@@ -171,23 +242,49 @@ def render_slide(image_source, brand_name="HUGO RAMIREZ", tagline="Design • St
             fill=WHITE
         )
     
-    # Headline (bottom)
+    # === TITLE with wrapping ===
+    title_y = TITLE_Y
     if headline:
-        draw.text(
-            (MARGIN_LEFT, TITLE_Y),
-            headline,
-            font=title_font,
-            fill=WHITE
-        )
+        # Wrap and truncate title
+        title_lines = wrap_text(headline, title_font, TITLE_MAX_WIDTH, draw)
+        title_lines = truncate_lines(title_lines, TITLE_MAX_LINES, title_font, TITLE_MAX_WIDTH, draw)
+        
+        # Get line height
+        bbox = draw.textbbox((0, 0), "Hg", font=title_font)
+        title_line_height = bbox[3] - bbox[1] + LINE_SPACING
+        
+        # Draw each line
+        for i, line in enumerate(title_lines):
+            draw.text(
+                (MARGIN_LEFT, title_y + (i * title_line_height)),
+                line,
+                font=title_font,
+                fill=WHITE
+            )
+        
+        # Calculate where subtitle starts (after title lines)
+        subtitle_start_y = title_y + (len(title_lines) * title_line_height) + 10
+    else:
+        subtitle_start_y = SUBTITLE_Y
     
-    # Subtitle (bottom)
+    # === SUBTITLE with wrapping ===
     if subtitle:
-        draw.text(
-            (MARGIN_LEFT, SUBTITLE_Y),
-            subtitle,
-            font=subtitle_font,
-            fill=WHITE
-        )
+        # Wrap and truncate subtitle
+        subtitle_lines = wrap_text(subtitle, subtitle_font, SUBTITLE_MAX_WIDTH, draw)
+        subtitle_lines = truncate_lines(subtitle_lines, SUBTITLE_MAX_LINES, subtitle_font, SUBTITLE_MAX_WIDTH, draw)
+        
+        # Get line height
+        bbox = draw.textbbox((0, 0), "Hg", font=subtitle_font)
+        subtitle_line_height = bbox[3] - bbox[1] + LINE_SPACING
+        
+        # Draw each line with softer color
+        for i, line in enumerate(subtitle_lines):
+            draw.text(
+                (MARGIN_LEFT, subtitle_start_y + (i * subtitle_line_height)),
+                line,
+                font=subtitle_font,
+                fill=SUBTITLE_COLOR  # Softer gray
+            )
     
     return canvas
 
@@ -200,8 +297,9 @@ def render_slide(image_source, brand_name="HUGO RAMIREZ", tagline="Design • St
 def home():
     return jsonify({
         "service": "Hugo Brand Engine",
-        "version": "3.2",
+        "version": "3.3",
         "status": "running",
+        "features": ["text_wrapping", "auto_truncate", "softer_subtitle"],
         "fonts": {
             "Montserrat-Bold": os.path.isfile(FONT_BOLD_PATH),
         },
@@ -213,7 +311,7 @@ def home():
 def health():
     return jsonify({
         'status': 'ok',
-        'version': '3.2',
+        'version': '3.3',
         'images_in_cache': len(generated_images)
     })
 
@@ -252,7 +350,7 @@ def render_slide_endpoint():
         
         data = request.get_json(force=True)
         
-        # Get image from URL or base64
+        # Get image
         image_source = None
         
         if data.get('image_base64'):
@@ -300,7 +398,7 @@ def render_slide_endpoint():
             'timestamp': time.time()
         }
         
-        # Also save to file
+        # Save to file
         filename = f"slide_{image_id}.png"
         output_path = os.path.join(POST_OUTPUT_DIR, filename)
         img.convert("RGB").save(output_path, format='PNG', quality=95)
@@ -323,11 +421,11 @@ def render_slide_endpoint():
 
 @app.route('/generate-post', methods=['POST'])
 def generate_post():
-    """Legacy endpoint - redirects to render-slide"""
+    """Legacy endpoint"""
     return render_slide_endpoint()
 
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
-    print(f"🚀 Hugo Brand Engine v3.2 starting on port {port}")
+    print(f"🚀 Hugo Brand Engine v3.3 starting on port {port}")
     app.run(host='0.0.0.0', port=port, debug=False)
