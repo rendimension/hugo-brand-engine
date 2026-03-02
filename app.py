@@ -1,4 +1,4 @@
-# v3.3 text wrapping + softer subtitle
+# v3.4 - 3-line subtitle support + taller footer
 from flask import Flask, request, send_file, jsonify, send_from_directory
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -39,7 +39,7 @@ SUBTITLE_COLOR = (220, 220, 220)  # Lighter gray - less visual weight
 TITLE_MAX_WIDTH = 980       # Max pixels width for title
 TITLE_MAX_LINES = 2         # Max lines for title
 SUBTITLE_MAX_WIDTH = 980    # Max pixels width for subtitle
-SUBTITLE_MAX_LINES = 2      # Max lines for subtitle
+SUBTITLE_MAX_LINES = 3      # v3.4: Increased from 2 to 3 lines
 
 # =========================
 # Load Fonts AT STARTUP
@@ -81,11 +81,11 @@ MARGIN_LEFT = 50
 MARGIN_RIGHT = 50
 BRAND_Y = 35
 TAGLINE_Y = 40
-TITLE_Y = 1180              # Moved up slightly to allow for 2 lines
+TITLE_Y = 1130              # v3.4: Moved up from 1180 to allow for 3-line subtitle
 SUBTITLE_Y = 1230           # Will be calculated dynamically
 LINE_SPACING = 8            # Space between lines
 HEADER_HEIGHT = 150
-FOOTER_HEIGHT = 280         # Increased for multi-line text
+FOOTER_HEIGHT = 340         # v3.4: Increased from 280 to fit 3-line subtitle
 
 
 def cleanup_old_images():
@@ -297,9 +297,9 @@ def render_slide(image_source, brand_name="HUGO RAMIREZ", tagline="Design • St
 def home():
     return jsonify({
         "service": "Hugo Brand Engine",
-        "version": "3.3",
+        "version": "3.4",
         "status": "running",
-        "features": ["text_wrapping", "auto_truncate", "softer_subtitle"],
+        "features": ["text_wrapping", "auto_truncate", "softer_subtitle", "3_line_subtitle"],
         "fonts": {
             "Montserrat-Bold": os.path.isfile(FONT_BOLD_PATH),
         },
@@ -311,7 +311,7 @@ def home():
 def health():
     return jsonify({
         'status': 'ok',
-        'version': '3.3',
+        'version': '3.4',
         'images_in_cache': len(generated_images)
     })
 
@@ -427,5 +427,5 @@ def generate_post():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
-    print(f"🚀 Hugo Brand Engine v3.3 starting on port {port}")
+    print(f"🚀 Hugo Brand Engine v3.4 starting on port {port}")
     app.run(host='0.0.0.0', port=port, debug=False)
